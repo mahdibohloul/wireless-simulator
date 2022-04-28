@@ -1,4 +1,7 @@
 Mac/802_11 set bandwidth_ [lindex $argv 0]
+set error_rate [lindex $argv 1]
+set dir [lindex $argv 2]
+
 
 # set MESSAGE_PORT 42
 # set BROADCAST_ADDR -1
@@ -26,11 +29,11 @@ set val(rp) AODV
 
 set ns [new Simulator]
 
-set tracefile [open rts-data-ack.tr w]
+set tracefile [open "$dir/rts-data-ack.tr" w+]
 $ns trace-all $tracefile
 $ns eventtrace-all
 
-set namfile [open rts-data-ack.nam w]
+set namfile [open "$dir/rts-data-ack.nam" w+]
 $ns namtrace-all-wireless $namfile 800 500
 
 # set up topography object
@@ -50,7 +53,7 @@ $ns color 9 pink;
 
 
 # set up nodes
-create_god 9
+create-god 9
 
 
 #set mac0 [new Mac/802_11]
@@ -63,6 +66,8 @@ $ns node-config -adhocRouting $val(rp) \
                 -antType $val(ant) \
                 -propType $val(prop) \
                 -phyType $val(netif) \
+                -IncomingErrProc UniformErr \
+                -OutgoingErrProc UniformErr \
 		-channelType Channel/WirelessChannel \
                 -topoInstance $topo \
                 -agentTrace ON \
@@ -72,15 +77,24 @@ $ns node-config -adhocRouting $val(rp) \
 
 
 proc finish {} {
-        global ns f nf val
+        global ns tracefile namfile val
         $ns flush-trace
-        close $f
-        close $nf
+        close $tracefile
+        close $namfile
 
 }
 
+proc UniformErr {} {
+	global error_rate
+	set error_model [new ErrorModel]
+	$error_model unit pkt
+	$error_model set rate_ $error_rate
+	$error_model ranvar [new RandomVariable/Uniform]
+	return $error_model
+}
+
 for {set i 0} {$i < 9} {incr i} {
-    set node($i) [$ns node]
+    set node_($i) [$ns node]
     $node_($i) random-motion 0
     $node_($i) color black
 }
@@ -130,5 +144,48 @@ $node_(8) set X_ 300
 $node_(8) set Y_ 300
 $node_(8) set Z_ 0
 
-set udp [new Agent/UDP]
-set null [new Agent/Null]
+set dlUdp [new Agent/UDP]
+set dlNull [new Agent/Null]
+
+$ns attach-agent $node_(2) $dlUdp
+$ns attach-agent $node_(8) $dlNull
+$ns connect $dlUdp $dlNull
+
+set dlCbr [new Application/Traffic/CBR]
+$dlCbr set packetSize_ 512
+$dlCbr set interval_ 0.01
+$dlCbr set rate_ 200kb
+$dlCbr attach-agent $dlUdp
+
+$ns at 0.1 "$dlCbr start"
+$ns at 20.0 "$dlCbr stop"
+
+
+
+set ahUdp [new Agent/UDP]
+set ahNull [new Agent/Null]
+
+$ns attach-agent $node_(1) $ahUdp
+$ns attach-agent $node_(7) $ahNull
+$ns connect $ahUdp $ahNull
+
+set ahCbr [new Application/Traffic/CBR]
+$ahCbr set packetSize_ 512
+$ahCbr set interval_ 0.01
+$ahCbr set rate_ 200kb
+$ahCbr attach-agent $ahUdp
+
+$ns at 0.1 "$ahCbr start"
+$ns at 20.0 "$ahCbr stop"
+
+for {set i 0} {$i < 9} {incr i} {
+    $ns initial_node_pos $node_($i) 30
+    $ns at 20.0 "$node_($i) reset";
+}
+
+$ns at 20.0 "finish"
+$ns at 20.1 "$ns halt"
+
+# puts "Starting simulation...."
+
+$ns run
