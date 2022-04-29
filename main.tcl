@@ -18,7 +18,7 @@ set val(ifq)            Queue/DropTail/PriQueue    ;# interface queue type
 set val(ll)             LL                         ;# link layer type
 set val(ant)            Antenna/OmniAntenna        ;# antenna model
 set val(ifqlen)         50                         ;# max packet in ifq
-set val(simulate_time)  100                         ;# seconds to run the simulation
+set val(simulate_time)  100                        ;# seconds to run the simulation
 
 
 set val(rp) AODV
@@ -78,7 +78,7 @@ proc finish {} {
         $ns flush-trace
         close $tracefile
         close $namfile
-
+        exit 0
 }
 
 proc UniformErr {} {
@@ -100,46 +100,55 @@ for {set i 0} {$i < 9} {incr i} {
 $node_(0) set X_ 100
 $node_(0) set Y_ 400
 $node_(0) set Z_ 0
+$ns at 0 "$node_(0) label B"
 
 #Node A
-$node_(1) set X_ 150
-$node_(1) set Y_ 600
+$node_(1) set X_ 200
+$node_(1) set Y_ 500
 $node_(1) set Z_ 0
+$ns at 0 "$node_(1) label A"
 
 #Node D
-$node_(2) set X_ 150
-$node_(2) set Y_ 200
+$node_(2) set X_ 200
+$node_(2) set Y_ 300
 $node_(2) set Z_ 0
+$ns at 0 "$node_(2) label D"
 
 #Node C
-$node_(3) set X_ 200
-$node_(3) set Y_ 500
+$node_(3) set X_ 350
+$node_(3) set Y_ 450
 $node_(3) set Z_ 0
+$ns at 0 "$node_(3) label C"
 
 #Node E
-$node_(4) set X_ 200
-$node_(4) set Y_ 300
+$node_(4) set X_ 350
+$node_(4) set Y_ 350
 $node_(4) set Z_ 0
+$ns at 0 "$node_(4) label E"
 
 #Node G
-$node_(5) set X_ 250
-$node_(5) set Y_ 500
+$node_(5) set X_ 450
+$node_(5) set Y_ 450
 $node_(5) set Z_ 0
+$ns at 0 "$node_(5) label G"
 
 #Node F
-$node_(6) set X_ 250
-$node_(6) set Y_ 300
+$node_(6) set X_ 450
+$node_(6) set Y_ 350
 $node_(6) set Z_ 0
+$ns at 0 "$node_(6) label F"
 
 #Node H
-$node_(7) set X_ 300
-$node_(7) set Y_ 500
+$node_(7) set X_ 550
+$node_(7) set Y_ 450
 $node_(7) set Z_ 0
+$ns at 0 "$node_(7) label H"
 
 #Node L
-$node_(8) set X_ 300
-$node_(8) set Y_ 300
+$node_(8) set X_ 550
+$node_(8) set Y_ 350
 $node_(8) set Z_ 0
+$ns at 0 "$node_(8) label L"
 
 
 set dlSink [new Agent/TCPSink]
@@ -160,8 +169,8 @@ set ahSink [new Agent/TCPSink]
 set ahTcp [new Agent/TCP/Reno]
 $ahTcp set packetSize_ 512
 
-$ns attach-agent $node_(2) $ahTcp
-$ns attach-agent $node_(8) $ahSink
+$ns attach-agent $node_(1) $ahTcp
+$ns attach-agent $node_(7) $ahSink
 $ns connect $ahTcp $ahSink
 
 set ahFtp [new Application/FTP]
@@ -172,7 +181,7 @@ $ns at $val(simulate_time) "$ahFtp stop"
 
 
 for {set i 0} {$i < 9} {incr i} {
-    $ns initial_node_pos $node_($i) 30
+    $ns initial_node_pos $node_($i) 40
     $ns at $val(simulate_time) "$node_($i) reset";
 }
 
