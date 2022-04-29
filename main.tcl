@@ -14,14 +14,11 @@ set val(netif)          Phy/WirelessPhy            ;# network interface type
 
 
 set val(mac)            Mac/802_11                 ;# MAC type
-#set val(mac)            Mac                 ;# MAC type
-#set val(mac)		Mac/Simple
-
-
 set val(ifq)            Queue/DropTail/PriQueue    ;# interface queue type
 set val(ll)             LL                         ;# link layer type
 set val(ant)            Antenna/OmniAntenna        ;# antenna model
-set val(ifqlen)         32768                         ;# max packet in ifq
+set val(ifqlen)         50                         ;# max packet in ifq
+set val(simulate_time)  100                         ;# seconds to run the simulation
 
 
 set val(rp) AODV
@@ -144,47 +141,43 @@ $node_(8) set X_ 300
 $node_(8) set Y_ 300
 $node_(8) set Z_ 0
 
-set dlUdp [new Agent/UDP]
-set dlNull [new Agent/Null]
 
-$ns attach-agent $node_(2) $dlUdp
-$ns attach-agent $node_(8) $dlNull
-$ns connect $dlUdp $dlNull
+set dlSink [new Agent/TCPSink]
+set dlTcp [new Agent/TCP/Reno]
+$dlTcp set packetSize_ 512
 
-set dlCbr [new Application/Traffic/CBR]
-$dlCbr set packetSize_ 512
-$dlCbr set interval_ 0.01
-$dlCbr set rate_ 200kb
-$dlCbr attach-agent $dlUdp
+$ns attach-agent $node_(2) $dlTcp
+$ns attach-agent $node_(8) $dlSink
+$ns connect $dlTcp $dlSink
 
-$ns at 0.1 "$dlCbr start"
-$ns at 20.0 "$dlCbr stop"
+set dlFtp [new Application/FTP]
+$dlFtp attach-agent $dlTcp
+$ns at 0 "$dlFtp start"
+$ns at $val(simulate_time) "$dlFtp stop"
 
 
+set ahSink [new Agent/TCPSink]
+set ahTcp [new Agent/TCP/Reno]
+$ahTcp set packetSize_ 512
 
-set ahUdp [new Agent/UDP]
-set ahNull [new Agent/Null]
+$ns attach-agent $node_(2) $ahTcp
+$ns attach-agent $node_(8) $ahSink
+$ns connect $ahTcp $ahSink
 
-$ns attach-agent $node_(1) $ahUdp
-$ns attach-agent $node_(7) $ahNull
-$ns connect $ahUdp $ahNull
+set ahFtp [new Application/FTP]
+$ahFtp attach-agent $ahTcp
+$ns at 0 "$ahFtp start"
+$ns at $val(simulate_time) "$ahFtp stop"
 
-set ahCbr [new Application/Traffic/CBR]
-$ahCbr set packetSize_ 512
-$ahCbr set interval_ 0.01
-$ahCbr set rate_ 200kb
-$ahCbr attach-agent $ahUdp
 
-$ns at 0.1 "$ahCbr start"
-$ns at 20.0 "$ahCbr stop"
 
 for {set i 0} {$i < 9} {incr i} {
     $ns initial_node_pos $node_($i) 30
-    $ns at 20.0 "$node_($i) reset";
+    $ns at $val(simulate_time) "$node_($i) reset";
 }
 
-$ns at 20.0 "finish"
-$ns at 20.1 "$ns halt"
+$ns at $val(simulate_time) "finish"
+$ns at [expr $val(simulate_time) + 0.1] "$ns halt"
 
 # puts "Starting simulation...."
 
