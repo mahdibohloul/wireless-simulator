@@ -39,15 +39,6 @@ set topo       [new Topography]
 
 $topo load_flatgrid 700 200
 
-$ns color 3 green;
-$ns color 8 red;
-$ns color 1 black;
-$ns color 7 purple;
-$ns color 6 tan;
-$ns color 2 orange;
-$ns color 5 blue;
-$ns color 4 yellow;
-$ns color 9 pink;
 
 
 # set up nodes
@@ -64,8 +55,8 @@ $ns node-config -adhocRouting $val(rp) \
                 -antType $val(ant) \
                 -propType $val(prop) \
                 -phyType $val(netif) \
-                -IncomingErrProc UniformErr \
-                -OutgoingErrProc UniformErr \
+                -IncomingErrProc GnrtErr \
+                -OutgoingErrProc GnrtErr \
 		-channelType Channel/WirelessChannel \
                 -topoInstance $topo \
                 -agentTrace ON \
@@ -82,7 +73,7 @@ proc finish {} {
         exit 0
 }
 
-proc UniformErr {} {
+proc GnrtErr {} {
 	global error_rate
 	set error_model [new ErrorModel]
 	$error_model unit pkt

@@ -27,9 +27,13 @@ do
         # echo "Bandwidth: ${bandwidths[$j]}"
         # echo "******************$dir_name"
         mkdir -p $dir_name
-        ns main.tcl ${bandwidths[j]} ${error_rates[$i]} $dir_name
+        var=$(ns main.tcl ${bandwidths[j]} ${error_rates[$i]} $dir_name)
         dir_name="epoch_$i"
     done
 done
+
+python3 analyzer.py
+
+rm -r epoch*
 
 echo "Done"
