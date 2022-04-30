@@ -8,7 +8,7 @@ PATH+=:/usr/bin/python3
 
 declare -a bandwidths
 bandwidths=(1.5 55 155)
-error_rates=(0.000010 0.000011 0.000012 0.000013 0.000014 0.000015 0.000016 0.000017 0.000018 0.000019)
+error_rates=(0.001 0.002 0.003 0.004 0.005 0.006 0.007 0.008 0.009 0.01)
 
 
 echo "Script for automating wireless network simulation"
