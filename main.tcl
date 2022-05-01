@@ -142,35 +142,60 @@ $node_(8) set Y_ 300
 $node_(8) set Z_ 0
 $ns at 0 "$node_(8) label L"
 
+set dlSink [new Agent/TCPSink]
+set dlTcp [new Agent/TCP/Reno]
+$dlTcp set packetSize_ 512
 
-set dlUdp [new Agent/UDP]
-set dlNull [new Agent/Null]
+$ns attach-agent $node_(2) $dlTcp
+$ns attach-agent $node_(8) $dlSink
+$ns connect $dlTcp $dlSink
 
-$ns attach-agent $node_(2) $dlUdp
-$ns attach-agent $node_(8) $dlNull
-$ns connect $dlUdp $dlNull
+set dlFtp [new Application/FTP]
+$dlFtp attach-agent $dlTcp
+$ns at 0 "$dlFtp start"
+$ns at $val(simulate_time) "$dlFtp stop"
 
-set dlCbr [new Application/Traffic/CBR]
-$dlCbr set packetSize_ 512
-$dlCbr set rate_ 200kb
-$dlCbr attach-agent $dlUdp
-$ns at 0 "$dlCbr start"
-$ns at $val(simulate_time) "$dlCbr stop"
+set ahSink [new Agent/TCPSink]
+set ahTcp [new Agent/TCP/Reno]
+$ahTcp set packetSize_ 512
+
+$ns attach-agent $node_(1) $ahTcp
+$ns attach-agent $node_(7) $ahSink
+$ns connect $ahTcp $ahSink
+
+set ahFtp [new Application/FTP]
+$ahFtp attach-agent $ahTcp
+$ns at 0 "$ahFtp start"
+$ns at $val(simulate_time) "$ahFtp stop"
+
+# set dlUdp [new Agent/UDP]
+# set dlNull [new Agent/Null]
+
+# $ns attach-agent $node_(2) $dlUdp
+# $ns attach-agent $node_(8) $dlNull
+# $ns connect $dlUdp $dlNull
+
+# set dlCbr [new Application/Traffic/CBR]
+# $dlCbr set packetSize_ 512
+# $dlCbr set rate_ 200kb
+# $dlCbr attach-agent $dlUdp
+# $ns at 0 "$dlCbr start"
+# $ns at $val(simulate_time) "$dlCbr stop"
 
 
-set ahUdp [new Agent/UDP]
-set ahNull [new Agent/Null]
+# set ahUdp [new Agent/UDP]
+# set ahNull [new Agent/Null]
 
-$ns attach-agent $node_(1) $ahUdp
-$ns attach-agent $node_(7) $ahNull
-$ns connect $ahUdp $ahNull
+# $ns attach-agent $node_(1) $ahUdp
+# $ns attach-agent $node_(7) $ahNull
+# $ns connect $ahUdp $ahNull
 
-set ahCbr [new Application/Traffic/CBR]
-$ahCbr set packetSize_ 512
-$ahCbr set rate_ 200kb
-$ahCbr attach-agent $ahUdp
-$ns at 0 "$ahCbr start"
-$ns at $val(simulate_time) "$ahCbr stop"
+# set ahCbr [new Application/Traffic/CBR]
+# $ahCbr set packetSize_ 512
+# $ahCbr set rate_ 200kb
+# $ahCbr attach-agent $ahUdp
+# $ns at 0 "$ahCbr start"
+# $ns at $val(simulate_time) "$ahCbr stop"
 
 
 

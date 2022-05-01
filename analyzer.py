@@ -18,10 +18,10 @@ def analyze_file(bdw, error_rate, index):
         lines = f.read().split('\n')
         for line in lines:
             logs = re.split(' |\t', line)
-            if logs[0] == 's' and (logs[2] == '_1_' or logs[2] == '_2_') and logs[3] == 'AGT' and logs[7] == 'cbr':
+            if logs[0] == 's' and (logs[2] == '_1_' or logs[2] == '_2_') and logs[3] == 'AGT' and logs[7] == 'tcp':
                 send_count += 1
                 start_times[logs[6]] = float(logs[1])
-            elif logs[0] == 'r' and (logs[2] == '_7_' or logs[2] == '_8_') and logs[3] == 'AGT' and logs[7] == 'cbr':
+            elif logs[0] == 'r' and (logs[2] == '_7_' or logs[2] == '_8_') and logs[3] == 'MAC' and logs[7] == 'tcp':
                 rcv_count += 1
                 packet_sum += float(logs[8])
                 delay_sum += float(logs[1]) - start_times[logs[6]]
