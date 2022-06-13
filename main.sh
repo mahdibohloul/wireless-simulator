@@ -32,6 +32,10 @@ do
     done
 done
 
+echo "-----------------------------------------------"
+echo "Simulation finished."
+echo "Going to analyze results."
+
 python3 analyzer.py
 
 rm -r epoch*
